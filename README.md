@@ -9,13 +9,14 @@
 body{
   margin:0;
   font-family:Arial;
-  background:linear-gradient(135deg,#ffe6f0,#e6f0ff);
-  transition:0.3s;
+  background:linear-gradient(135deg,#fff0f6,#e6f7ff);
 }
 
+/* 頂部 */
 h1{
   text-align:center;
-  padding:12px;
+  padding:18px;
+  font-size:26px;
 }
 
 /* 工具列 */
@@ -23,72 +24,75 @@ h1{
   display:flex;
   flex-wrap:wrap;
   justify-content:center;
-  gap:8px;
+  gap:10px;
   padding:10px;
 }
 
 input, select, button{
-  padding:10px;
-  border-radius:12px;
+  padding:10px 12px;
+  border-radius:14px;
   border:none;
-  box-shadow:0 2px 8px rgba(0,0,0,0.1);
-  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  font-size:14px;
 }
 
-/* 卡片區 */
+/* GRID */
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  gap:15px;
-  padding:15px;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:16px;
+  padding:16px;
 }
 
-/* 卡片 */
+/* 卡片升級 */
 .card{
   background:white;
   border-radius:18px;
   overflow:hidden;
   position:relative;
   cursor:pointer;
-  box-shadow:0 6px 18px rgba(0,0,0,0.12);
+  box-shadow:0 10px 25px rgba(0,0,0,0.12);
   transition:0.25s;
 }
 
 .card:hover{
   transform:translateY(-6px) scale(1.02);
-  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  box-shadow:0 15px 30px rgba(0,0,0,0.2);
 }
 
 .card img{
   width:100%;
-  height:140px;
+  height:150px;
   object-fit:cover;
 }
 
 .card h3{
   font-size:14px;
   margin:8px;
+  padding:0 6px;
 }
 
-/* 愛心 */
+/* ❤️ 收藏 */
 .heart{
   position:absolute;
   top:8px;
   right:10px;
   font-size:18px;
-  cursor:pointer;
+  background:white;
+  border-radius:50%;
+  padding:4px;
 }
 
 /* badge */
 .badge{
-  background:linear-gradient(45deg,#ff4d6d,#ff8fa3);
+  background:linear-gradient(45deg,#ff4d6d,#ff85a2);
   color:white;
-  padding:3px 8px;
+  padding:3px 10px;
   border-radius:999px;
   font-size:12px;
 }
 
-/* 彈窗 */
+/* modal */
 .modal{
   position:fixed;
   inset:0;
@@ -102,10 +106,10 @@ input, select, button{
   background:white;
   padding:18px;
   border-radius:18px;
-  width:260px;
+  width:280px;
 }
 
-/* 深色模式 */
+/* 🌙 深色模式 */
 .dark{
   background:#0f0f14;
   color:white;
@@ -120,6 +124,7 @@ input, select, button{
 .dark select,
 .dark button{
   background:#2a2a38;
+  color:white;
   color:white;
 }
 </style>
@@ -139,12 +144,12 @@ input, select, button{
   <option value="halloween">萬聖節</option>
   <option value="christmas">聖誕節</option>
   <option value="valentine">情人節</option>
-  <option value="fav">❤️ 收藏夾</option>
+  <option value="fav">❤️ 收藏</option>
 </select>
 
 <select id="sort">
-  <option value="id">排序ID</option>
-  <option value="name">排序名稱</option>
+  <option value="id">排序：ID</option>
+  <option value="name">排序：名稱</option>
 </select>
 
 <button onclick="toggleDark()">🌙</button>
@@ -155,6 +160,7 @@ input, select, button{
 
 <div class="grid" id="grid"></div>
 
+<!-- 彈窗 -->
 <div class="modal" id="modal">
   <div class="modal-box">
     <img id="mimg" style="width:100%;border-radius:10px;">
@@ -166,14 +172,70 @@ input, select, button{
 
 <script>
 
-/* ===== 50隻資料（簡化版，可換你完整JSON） ===== */
-const data = Array.from({length:50}).map((_,i)=>({
-  id:i+1,
-  name:"Bear "+(i+1),
-  img:"https://via.placeholder.com/300",
-  tag:i%4===0?"halloween":i%4===1?"christmas":i%4===2?"valentine":"normal",
-  desc:"可愛熊熊 "+(i+1)
-}));
+/*const data = [
+{ id:1, name:"America Cares Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"白色／星條旗愛心圖案｜象徵關懷與團結。" },
+{ id:2, name:"Perfect Panda", tag:"normal", img:"https://via.placeholder.com/300", desc:"黑白色／流星造型｜追求平衡與自信。" },
+{ id:3, name:"Hopeful Heart Bear", tag:"valentine", img:"https://via.placeholder.com/300", desc:"粉色／彩虹愛心圖案｜代表希望與正向力量。" },
+{ id:4, name:"Love-a-Lot Bear", tag:"valentine", img:"https://via.placeholder.com/300", desc:"粉紅色／雙愛心圖案｜象徵愛與關懷。" },
+{ id:5, name:"Cheer Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"桃粉色／彩虹圖案｜樂觀開朗。" },
+
+{ id:6, name:"Secret Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"守護秘密。" },
+{ id:7, name:"Always There Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"陪伴支持。" },
+{ id:8, name:"Friend Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"友情。" },
+{ id:9, name:"Work of Heart Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"創意用心。" },
+{ id:10, name:"Sparkle Heart Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"閃耀希望。" },
+
+{ id:11, name:"Birthday Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"生日快樂。" },
+{ id:12, name:"Funshine Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"快樂陽光。" },
+{ id:13, name:"Laugh-a-Lot Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"歡笑。" },
+{ id:14, name:"Do-Your-Best Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"努力。" },
+{ id:15, name:"Good Luck Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"幸運。" },
+
+{ id:16, name:"Wish Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"願望。" },
+{ id:17, name:"Grams Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"慈愛。" },
+{ id:18, name:"Grams Bear (New)", tag:"normal", img:"https://via.placeholder.com/300", desc:"新版。" },
+{ id:19, name:"Bedtime Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"睡眠。" },
+{ id:20, name:"Sea Friend Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"海洋。" },
+
+{ id:21, name:"Heart Song Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"音樂。" },
+{ id:22, name:"Grumpy Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"外冷內暖。" },
+{ id:23, name:"Sweet Dreams Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"夢境。" },
+{ id:24, name:"Share Bear Milkshake", tag:"normal", img:"https://via.placeholder.com/300", desc:"分享。" },
+{ id:25, name:"Share Bear (New)", tag:"normal", img:"https://via.placeholder.com/300", desc:"分享。" },
+
+{ id:26, name:"Take Care Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"照顧。" },
+{ id:27, name:"Harmony Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"和平。" },
+{ id:28, name:"Best Friend Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"好友。" },
+{ id:29, name:"Forest Friend Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"自然。" },
+{ id:30, name:"Tenderheart Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"關懷。" },
+
+{ id:31, name:"True Heart Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"真誠。" },
+{ id:32, name:"Togetherness Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"團結。" },
+{ id:33, name:"Calming Heart Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"平靜。" },
+{ id:34, name:"Care-a-Lot Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"關愛。" },
+{ id:35, name:"Dream Bright Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"夢想。" },
+
+{ id:36, name:"I Care Bear", tag:"normal", img:"https://via.placeholder.com/300", desc:"關心世界。" },
+
+{ id:37, name:"All My Heart Bear", tag:"valentine", img:"https://via.placeholder.com/300", desc:"情人節。" },
+{ id:38, name:"Sweet Messages Bear", tag:"valentine", img:"https://via.placeholder.com/300", desc:"訊息。" },
+
+{ id:39, name:"Trick-or-Sweet Bear", tag:"halloween", img:"https://via.placeholder.com/300", desc:"萬聖節。" },
+{ id:40, name:"Trick-or-Sweet Bear (2022–2023)", tag:"halloween", img:"https://via.placeholder.com/300", desc:"萬聖節。" },
+{ id:41, name:"Spooky Sparkle Bear", tag:"halloween", img:"https://via.placeholder.com/300", desc:"閃耀。" },
+{ id:42, name:"Cheer Bear Halloween", tag:"halloween", img:"https://via.placeholder.com/300", desc:"蝙蝠。" },
+{ id:43, name:"Tenderheart Bear Halloween", tag:"halloween", img:"https://via.placeholder.com/300", desc:"骷髏。" },
+{ id:44, name:"Good Luck Bear Halloween", tag:"halloween", img:"https://via.placeholder.com/300", desc:"科學怪人。" },
+
+{ id:45, name:"Christmas Wishes Bear (2021)", tag:"christmas", img:"https://via.placeholder.com/300", desc:"聖誕。" },
+{ id:46, name:"Christmas Wishes Bear (2022)", tag:"christmas", img:"https://via.placeholder.com/300", desc:"聖誕。" },
+{ id:47, name:"Christmas Wishes Bear (2024)", tag:"christmas", img:"https://via.placeholder.com/300", desc:"馴鹿。" },
+{ id:48, name:"Christmas Wishes Bear (2025)", tag:"christmas", img:"https://via.placeholder.com/300", desc:"聖誕樹。" },
+
+{ id:49, name:"Grumpy Bear (Birthday)", tag:"normal", img:"https://via.placeholder.com/300", desc:"生日。" },
+{ id:50, name:"Cheer Bear (Birthday)", tag:"normal", img:"https://via.placeholder.com/300", desc:"生日。" }
+];  */
+const data = window.data || [];
 
 /* 收藏 */
 let fav = JSON.parse(localStorage.getItem("fav")||"[]");
@@ -236,7 +298,7 @@ function toggleDark(){
   document.body.classList.toggle("dark");
 }
 
-/* 篩選＋排序核心 */
+/* 篩選 */
 function applyFilters(){
 
   let list=[...data];
@@ -269,11 +331,10 @@ document.getElementById("search").oninput=applyFilters;
 document.getElementById("category").onchange=applyFilters;
 document.getElementById("sort").onchange=applyFilters;
 
-/* 初始 */
+/* 初始化 */
 applyFilters();
 
 </script>
 
 </body>
-
 </html>
